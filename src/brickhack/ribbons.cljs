@@ -84,7 +84,6 @@
    :update #'sketch-update
    :middleware [middleware/fun-mode]
    :settings (fn []
-               (q/random-seed 432)
-               (q/noise-seed 1243))))
+               (q/random-seed 432))))
 
 (defonce sketch (create "sketch"))
