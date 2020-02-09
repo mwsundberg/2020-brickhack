@@ -13,12 +13,29 @@
   [id]
   (c/particle-trail id (q/random w) (q/random h) (rand-nth (:colors palette))))
 
+; settings constants
 (def noise-zoom 0.002)
+(def display-field false)
 
 (defn noise-field-radian
   "Get a position dependent radian"
   [x y]  
   (* 2 Math/PI (c/noise-field x y noise-zoom)))
+
+(defn render-field-vector
+  "Debugging radian noise fields"
+  [x y]
+  (let [r (noise-field-radian x y)]
+    (q/stroke [0 0 0])
+    (apply q/line x y (c/coords-with-radian x y r 5))
+    (q/ellipse x y 2 2)))
+
+(defn render-field
+  "Render a whole field of vectors"
+  [width height]
+  (doseq [x (range 0 width 10)]
+    (doseq [y (range 0 height 10)]
+      (render-field-vector x y))))
 
                                         ; Start of the sketch codes
 
@@ -55,7 +72,8 @@
     (doseq [point (:points trail)]
       (q/vertex (:x point) (:y point)))
     (q/vertex (:x (last (:points trail))) h)
-    (q/end-shape :close)))
+    (q/end-shape :close))
+  (when display-field (render-field w h) (q/no-loop)))
 
 (defn create [canvas]
   (q/sketch
@@ -67,6 +85,6 @@
    :middleware [middleware/fun-mode]
    :settings (fn []
                (q/random-seed 432)
-               (q/noise-seed 432))))
+               (q/noise-seed 1243))))
 
 (defonce sketch (create "sketch"))
