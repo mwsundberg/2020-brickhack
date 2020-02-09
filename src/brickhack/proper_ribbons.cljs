@@ -1,6 +1,6 @@
-(ns brickhack.ribbons
+(ns brickhack.proper-ribbons
   (:require [brickhack.common :as c]
-    	    [quil.core :as q]
+          [quil.core :as q]
             [quil.middleware :as middleware]))
 
 (def body (.-body js/document))
@@ -19,6 +19,16 @@
   "Get a position dependent radian"
   [x y]  
   (* 4 Math/PI (c/noise-field x y noise-zoom)))
+
+(defn polygon-to-baseboard
+  [point1 point2 h]
+  (apply q/fill (:color point1))
+      (q/begin-shape)
+      (q/vertex (:x point1) h)
+      (q/vertex (:x point1) (:y point1))
+      (q/vertex (:x point2) (:y point2))
+      (q/vertex (:x point2) h)
+      (q/end-shape :close))
 
                                         ; Start of the sketch codes
 
@@ -47,15 +57,20 @@
                         points)))))))
 
 (defn sketch-draw [trails]
- 	(apply q/background (:background palette))
-  (doseq [trail trails]
-    (apply q/fill (:color trail))
-    (q/begin-shape)
-    (q/vertex (:x (first (:points trail))) h)
-    (doseq [point (:points trail)]
-      (q/vertex (:x point) (:y point)))
-    (q/vertex (:x (last (:points trail))) h)
-    (q/end-shape :close)))
+  (apply q/background (:background palette))
+  ; Reduce each trail to a list of point pairs (ready for cons-ing)
+  (as-> trails val
+    (map
+      (fn [trail]
+        (partition 2 1 (:points trail)))
+      val)
+    (sort-by
+      (fn
+        [point-pair]
+        (:y (first point-pair)))
+      val)
+    (doseq [point-pair val]
+      (polygon-to-baseboard (first point-pair) (second point-pair) h))))
 
 (defn create [canvas]
   (q/sketch
