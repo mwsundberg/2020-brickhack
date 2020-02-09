@@ -1,6 +1,6 @@
-(ns brickhack.core
+(ns brickhack.rounding
   (:require [brickhack.common :as c]
-    								[quil.core :as q]
+    	    [quil.core :as q]
             [quil.middleware :as middleware]))
 
 (def body (.-body js/document))
@@ -9,20 +9,7 @@
 
                                         ; This-sketch custom code
 (def palette (rand-nth c/palettes))
-
-(defn particle
-  "Create a particle obj"
-  [id]
-  {:id        id
-   :vx        0
-   :vy        0
-   :size      2
-   :direction 0
-   :length    0
-   :x         (q/random w)
-   :y         (q/random h)
-   :color     (rand-nth (:colors palette))})
-
+(defn particle [id] (c/particle id w h palette))
 
 (def noise-zoom 0.005)
 
@@ -35,22 +22,7 @@
   "Get a position dependent radian"
   ([x y]      (noise-field-radian x y noise-zoom 4))
   ([x y zoom] (noise-field-radian x y zoom 4))
-  ([x y zoom scalar] (* scalar Math/PI (noise-field x y zoom))))
-
-(defn render-field-vector
-  "Debugging radian noise fields"
-  [x y]
-  (let [r (noise-field-radian x y)]
-    (q/stroke [0 0 0])
-    (apply q/line x y (c/coords-with-radian x y r 5))
-    (q/ellipse x y 2 2)))
-
-(defn render-field
-  "Render a whole field of vectors"
-  [width height]
-  (doseq [x (range 0 width 10)]
-    (doseq [y (range 0 height 10)]
-      (render-field-vector x y))))
+  ([x y zoom scalar] (c/round-to (* scalar Math/PI (noise-field x y zoom)) (/ Math/PI 4))))
 
                                         ; Start of the sketch codes
 

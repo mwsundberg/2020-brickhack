@@ -1,6 +1,6 @@
-(ns brickhack.core
+(ns brickhack.intersections
   (:require [brickhack.common :as c]
-    								[quil.core :as q]
+    	    [quil.core :as q]
             [quil.middleware :as middleware]))
 
 (def body (.-body js/document))
@@ -9,48 +9,17 @@
 
                                         ; This-sketch custom code
 (def palette (rand-nth c/palettes))
+(defn particle [id] (c/particle id w h palette))
 
-(defn particle
-  "Create a particle obj"
-  [id]
-  {:id        id
-   :vx        0
-   :vy        0
-   :size      2
-   :direction 0
-   :length    0
-   :x         (q/random w)
-   :y         (q/random h)
-   :color     (rand-nth (:colors palette))})
-
-
-(def noise-zoom 0.005)
-
-(defn noise-field
-  "Generate a perlin noise location dependent value"
-  ([x y]      (noise-field x y noise-zoom))
-  ([x y zoom] (q/noise (* x zoom) (* y zoom))))
+(def noise-zoom 0.002)
 
 (defn noise-field-radian
   "Get a position dependent radian"
-  ([x y]      (noise-field-radian x y noise-zoom 4))
-  ([x y zoom] (noise-field-radian x y zoom 4))
-  ([x y zoom scalar] (* scalar Math/PI (noise-field x y zoom))))
-
-(defn render-field-vector
-  "Debugging radian noise fields"
-  [x y]
-  (let [r (noise-field-radian x y)]
-    (q/stroke [0 0 0])
-    (apply q/line x y (c/coords-with-radian x y r 5))
-    (q/ellipse x y 2 2)))
-
-(defn render-field
-  "Render a whole field of vectors"
-  [width height]
-  (doseq [x (range 0 width 10)]
-    (doseq [y (range 0 height 10)]
-      (render-field-vector x y))))
+  [x y]  
+  (* 4 Math/PI (c/noise-field x y noise-zoom)))
+(defn noise-field-color
+  [x y i]
+  (nth (:colors palette) (c/normalize-to (c/noise-field x y noise-zoom (/ i 1000)) (count (:colors palette)))))
 
                                         ; Start of the sketch codes
 
@@ -65,15 +34,19 @@
   (map particle (range 0 2000)))
 
 (defn sketch-update [particles]
-  (map (fn [p]
+  (->> particles
+       (map (fn [p]
          (assoc p
                 :x (c/add-with-rollover (:x p) (:vx p) w)
                 :y (c/add-with-rollover (:y p) (:vy p) h)
                 :length (+ 1 (:length p))
+                :color (noise-field-color (:x p) (:y p) (:id p))
                 :direction (noise-field-radian (:x p) (:y p))
                 :vx (c/average (:dx p) (Math/cos (:direction p)))
                 :vy (c/average (:dy p) (Math/sin (:direction p)))))
-       particles))
+       particles)
+       (filter (fn [p]
+                 (>= 10000 (:length p))))))
 
 (defn sketch-draw [particles]
  ; (apply q/background (:background palette))
