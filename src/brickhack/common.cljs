@@ -75,12 +75,11 @@
    :color     (rand-nth (:colors palette))})
 (defn particle-trail
   "Create a particle obj"
-  [id x y palette]
+  [id x y color]
   {:id        id
    :size      2
-   :x         '(x)
-   :y         '(y)
-   :color     (rand-nth (:colors palette))})
+   :points    (list [x y] [x y])
+   :color     color})
 
 (defn noise-field 
   "Create a perlin noise field with a certain resolution"
@@ -96,3 +95,22 @@
    (normalize-to value 0 max))
   ([value min max]
    (+ min (* value (- max min)))))
+
+
+; (defn get-tail-velocity
+;   "Given a list of coordinates get the velocity from the last two"
+;   [coordinates]
+;   [(- (get (nth coordinates -1) 0)
+;       (get (nth coordinates -2) 0))
+;    (- (get (nth coordinates -1) 1)
+;       (get (nth coordinates -2) 1))])
+
+(defn v-add
+  "Add a 2 number vector"
+  [vector1 vector2]
+  [(+ (first vector1) (first vector2)) (+ (second vector1) (second vector2))])
+
+(defn v-sub
+  "Add a 2 number vector"
+  [vector1 vector2]
+  [(- (first vector1) (first vector2)) (- (second vector1) (second vector2))])

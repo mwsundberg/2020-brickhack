@@ -1,4 +1,4 @@
-(ns brickhack.intersections
+(ns brickhack.trails
   (:require [brickhack.common :as c]
     	    [quil.core :as q]
             [quil.middleware :as middleware]))
@@ -9,7 +9,9 @@
 
                                         ; This-sketch custom code
 (def palette (rand-nth c/palettes))
-(defn particle [id] (c/particle id w h palette))
+(defn trail
+  [id]
+  (c/particle-trail id (q/random w) (q/random h) (rand-nth (:colors palette))))
 
 (def noise-zoom 0.002)
 
@@ -17,9 +19,6 @@
   "Get a position dependent radian"
   [x y]  
   (* 4 Math/PI (c/noise-field x y noise-zoom)))
-(defn noise-field-color
-  [x y i]
-  (nth (:colors palette) (c/normalize-to (c/noise-field x y noise-zoom (/ i 1000)) (count (:colors palette)))))
 
                                         ; Start of the sketch codes
 
@@ -31,28 +30,29 @@
                                         ; Create 2000 particles at the start
   ; (render-field w h)
   (q/no-stroke)
-  (map particle (range 0 2000)))
+  (map trail (range 0 2000)))
 
-(defn sketch-update [particles]
-  (->> particles
-       (map (fn [p]
-         (assoc p
-                :x (c/add-with-rollover (:x p) (:vx p) w)
-                :y (c/add-with-rollover (:y p) (:vy p) h)
-                :length (+ 1 (:length p))
-                :color (noise-field-color (:x p) (:y p) (:id p))
-                :direction (noise-field-radian (:x p) (:y p))
-                :vx (c/average (:dx p) (Math/cos (:direction p)))
-                :vy (c/average (:dy p) (Math/sin (:direction p)))))
-       particles)
-       (filter (fn [p]
-                 (>= 10000 (:length p))))))
+(defn sketch-update [trails]
+  (->> trails
+       (map (fn [trail]
+              (let [points       (:points trail)
+                    velocity     (c/v-sub (first points) (second points))
+                    theta        (apply noise-field-radian (first points))
+                    new-velocity [(c/average (first  velocity) (Math/cos theta))
+                                  (c/average (second velocity) (Math/sin theta))]]
+                (assoc trail :points
+                  (cons (c/v-add (first points) new-velocity)
+                        points)))))))
 
-(defn sketch-draw [particles]
- ; (apply q/background (:background palette))
-  (doseq [p particles]
-    (apply q/fill (:color p))
-    (q/ellipse (:x p) (:y p) (:size p) (:size p))))
+(defn sketch-draw [trails]
+ 	(apply q/background (:background palette))
+  (doseq [trail trails]
+    (q/stroke-weight (:size trail))
+    (q/stroke (:color trail))
+    (reduce (fn [prev current]
+              (q/line prev current)
+              current)
+            (:points trail))))
 
 (defn create [canvas]
   (q/sketch
