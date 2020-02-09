@@ -73,12 +73,14 @@
    :x         (q/random width)
    :y         (q/random height)
    :color     (rand-nth (:colors palette))})
+
 (defn particle-trail
-  "Create a particle obj"
+  "Create a string type object"
   [id x y color]
   {:id        id
    :size      2
-   :points    (list [x y] [x y])
+   :points    (list {:x x :y y :color color}
+                    {:x x :y y :color color})
    :color     color})
 
 (defn noise-field 
@@ -105,12 +107,16 @@
 ;    (- (get (nth coordinates -1) 1)
 ;       (get (nth coordinates -2) 1))])
 
-(defn v-add
-  "Add a 2 number vector"
-  [vector1 vector2]
-  [(+ (first vector1) (first vector2)) (+ (second vector1) (second vector2))])
+(defn point-add
+  "Subtract the coordinates of two points"
+  [point1 point2]
+  (assoc point1
+    :x (+ (:x point1) (:x point2))
+    :y (+ (:y point1) (:y point2))))
 
-(defn v-sub
-  "Add a 2 number vector"
-  [vector1 vector2]
-  [(- (first vector1) (first vector2)) (- (second vector1) (second vector2))])
+(defn point-sub
+  "Subtract the coordinates of two points"
+  [point1 point2]
+  (assoc point1
+    :x (- (:x point1) (:x point2))
+    :y (- (:y point1) (:y point2))))
