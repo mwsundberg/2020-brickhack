@@ -13,7 +13,8 @@
   [id]
   (c/particle-trail id (q/random w) (q/random h) (rand-nth (:colors palette))))
 
-(def noise-zoom 0.002)
+(def noise-zoom 0.002) ; changes how zoomed in on curves the thing is (smaller == smoother, generally < 1)
+(def step-scalar 1.75) ; changes how much each point jumps
 
 (defn noise-field-radian
   "Get a position dependent radian"
@@ -42,7 +43,7 @@
   (q/no-stroke)
   (sort-by (fn [trail]
              (:y (first (:points trail))))
-           (map trail (range 0 200))))
+           (map trail (range 0 20))))
 
 (defn sketch-update [trails]
   (->> trails
@@ -53,22 +54,27 @@
                     new-velocity {:x (c/average (:x velocity) (Math/cos theta))
                                   :y (c/average (:y velocity) (Math/sin theta))}]
                 (assoc trail :points
-                  (cons (c/point-add (first points) new-velocity)
+                  (cons (c/point-add (first points) (c/point-scale step-scalar new-velocity))
                         points)))))))
 
 (defn sketch-draw [trails]
   (apply q/background (:background palette))
   ; Reduce each trail to a list of point pairs (ready for cons-ing)
   (as-> trails val
+    ; Replace each trail with a list of pairs
     (map
       (fn [trail]
         (partition 2 1 (:points trail)))
       val)
+    ; Merge all of the trails' points
+    (apply concat val)
+    ; Sort them on the y axis
     (sort-by
       (fn
         [point-pair]
         (:y (first point-pair)))
       val)
+    ; Hopefully this works
     (doseq [point-pair val]
       (polygon-to-baseboard (first point-pair) (second point-pair) h))))
 
