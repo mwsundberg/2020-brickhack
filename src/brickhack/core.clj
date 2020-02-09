@@ -1,6 +1,6 @@
 (ns brickhack.core
   (:require [quil.core :as q]
-            [quil.middleware :as m]))
+            [quil.middleware :as middleware]))
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
@@ -45,4 +45,4 @@
   ; This sketch uses functional-mode middleware.
   ; Check quil wiki for more info about middlewares and particularly
   ; fun-mode.
-  :middleware [m/fun-mode])
+  :middleware [middleware/fun-mode])
