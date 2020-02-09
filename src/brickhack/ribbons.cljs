@@ -18,7 +18,7 @@
 (defn noise-field-radian
   "Get a position dependent radian"
   [x y]  
-  (* 4 Math/PI (c/noise-field x y noise-zoom)))
+  (* 2 Math/PI (c/noise-field x y noise-zoom)))
 
                                         ; Start of the sketch codes
 
