@@ -98,15 +98,6 @@
   ([value min max]
    (+ min (* value (- max min)))))
 
-
-; (defn get-tail-velocity
-;   "Given a list of coordinates get the velocity from the last two"
-;   [coordinates]
-;   [(- (get (nth coordinates -1) 0)
-;       (get (nth coordinates -2) 0))
-;    (- (get (nth coordinates -1) 1)
-;       (get (nth coordinates -2) 1))])
-
 (defn point-add
   "Subtract the coordinates of two points"
   [point1 point2]
