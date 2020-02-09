@@ -1,5 +1,6 @@
 (ns brickhack.core
-  (:require [quil.core :as q]
+  (:require [brickhack.common :as c]
+    								[quil.core :as q]
             [quil.middleware :as middleware]))
 
 (def body (.-body js/document))
@@ -73,23 +74,24 @@
 
 (defn noise-field-radian
   "Get a position dependent radian"
-  ([x y]      (* 2 Math/PI (noise-field x y noise-zoom)))
-  ([x y zoom] (* 2 Math/PI (noise-field x y zoom))))
+  ([x y]      (noise-field-radian x y noise-zoom 4))
+  ([x y zoom] (noise-field-radian x y zoom 4))
+  ([x y zoom scalar] (* scalar Math/PI (noise-field x y zoom))))
 
-(defn update-size 
-  "Line sizing function"
-  [current new]
-  (/ (+ current new) 2))
+(defn render-field-vector
+  "Debugging radian noise fields"
+  [x y]
+  (let [r (noise-field-radian x y)]
+    (q/stroke [0 0 0])
+    (apply q/line x y (c/coords-with-radian x y r 5))
+    (q/ellipse x y 2 2)))
 
-(defn update-position
-  "Calculates the next position based on the current, the speed and a max."
-  [current delta max]
-  (mod (+ current delta) max))
-
-(defn update-velocity
-  "combine two velocities"
-  [current new]
-  (/ (+ current new) 2))
+(defn render-field
+  "Render a whole field of vectors"
+  [width height]
+  (doseq [x (range 0 width 10)]
+    (doseq [y (range 0 height 10)]
+      (render-field-vector x y))))
 
                                         ; Start of the sketch codes
 
@@ -99,17 +101,19 @@
   (q/no-stroke)
   (apply q/background (:background palette))
                                         ; Create 2000 particles at the start
+  (render-field w h)
+  (q/no-stroke)
   (map particle (range 0 2000)))
 
 (defn sketch-update [particles]
   (map (fn [p]
          (assoc p
-                :x (update-position (:x p) (:vx p) w)
-                :y (update-position (:y p) (:vy p) h)
+                :x (c/add-with-rollover (:x p) (:vx p) w)
+                :y (c/add-with-rollover (:y p) (:vy p) h)
                 :length (+ 1 (:length p))
                 :direction (noise-field-radian (:x p) (:y p))
-                :vx (update-velocity (:dx p) (Math/cos (:direction p)))
-                :vy (update-velocity (:dy p) (Math/sin (:direction p)))))
+                :vx (c/average (:dx p) (Math/cos (:direction p)))
+                :vy (c/average (:dy p) (Math/sin (:direction p)))))
        particles))
 
 (defn sketch-draw [particles]
@@ -127,7 +131,7 @@
    :update #'sketch-update
    :middleware [middleware/fun-mode]
    :settings (fn []
-               (q/random-seed 1234)
-               (q/noise-seed 1234))))
+               (q/random-seed 432)
+               (q/noise-seed 432))))
 
 (defonce sketch (create "sketch"))
