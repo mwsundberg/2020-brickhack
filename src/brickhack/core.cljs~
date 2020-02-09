@@ -1,0 +1,33 @@
+(ns brickhack.core
+  (:require [quil.core :as q]
+            [quil.middleware :as middleware]))
+
+(def body (.-body js/document))
+(def w (.-clientWidth body))
+(def h (.-clientHeight body))
+
+(defn sketch-setup []
+  ; Set color mode to HSB (HSV) instead of default RGB
+  (q/color-mode :hsb)
+  [])
+
+(defn sketch-update [state]
+  state)
+
+(defn sketch-draw [state]
+  (q/background 30)
+  (q/ellipse (/ w 2) (/ h 2) 100 100))
+
+(defn create [canvas]
+  (q/sketch
+   :host canvas
+   :size [w h]
+   :draw #'sketch-draw
+   :setup #'sketch-setup
+   :update #'sketch-update
+   :middleware [middleware/fun-mode]
+   :settings (fn []
+               (q/random-seed 666)
+               (q/noise-seed 666))))
+
+(defonce sketch (create "sketch"))

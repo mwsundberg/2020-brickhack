@@ -1,0 +1,4 @@
+{:paths ["src" "resources" "target"]
+ :deps {org.clojure/clojure {:mvn/version "1.10.1"}
+        com.bhauman/figwheel-main {:mvn/version "0.2.0"}
+        quil {:mvn/version "3.1.0"}}}
