@@ -9,7 +9,8 @@ My process for interactively building this app was running `clojure -m figwheel.
 ## Images
 In this regard the app was quite successful. Below are some screenshots:
 
-![Early Ddesign](pictures/2020-02-08-01.png)
+![Early Ddesign](pictures/2020-02-08-01.png) ![Ribbons with intersection](pictures/2020-02-09-07.png)
+![Ribbons](pictures/2020-02-09-10.png)
 ![More early work](pictures/2020-02-08-02.png)
 ![Constrained angles](pictures/2020-02-08-03.png)
 ![Even ribbons](pictures/2020-02-09-01.png)
@@ -20,6 +21,4 @@ In this regard the app was quite successful. Below are some screenshots:
 ![Lower noise resolution](pictures/2020-02-09-04.png)
 ![Ribbons with intersection](pictures/2020-02-09-06.png)
 ![Spraypaint](pictures/2020-02-09-09.png)
-![Ribbons with intersection](pictures/2020-02-09-07.png)
 ![Interpolation](pictures/2020-02-09-08.png)
-![Ribbons](pictures/2020-02-09-10.png)
