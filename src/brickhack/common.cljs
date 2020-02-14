@@ -118,3 +118,13 @@
   (assoc point
     :x (* scalar (:x point))
     :y (* scalar (:y point))))
+
+(defn v-add
+  "Add two vectors element-wise"
+  [v1 v2]
+  [(+ (first v1) (first v2)) (+ (second v1) (second v2))])
+
+(defn v-sub
+  "Subtract two vectors element-wise"
+  [v1 v2]
+  [(- (first v1) (first v2)) (- (second v1) (second v2))])
